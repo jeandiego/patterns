@@ -1,0 +1,229 @@
+trigger:
+  - main
+  - develop
+  - hml
+
+pool:
+  name: 'webapp-agent'
+
+variables:
+  - group: custom-web-var
+
+stages:
+  - stage: Build_Dev
+    displayName: 'Build Dev'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
+    jobs:
+      - job: Build
+        displayName: 'Build Dev'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: 20.x
+            displayName: 'Install Node '
+
+          - script: npm install -g yarn
+            displayName: Install Yarn
+
+          - script: |
+              corepack enable
+              yarn install
+              yarn set version 4.6.0
+            displayName: 'Instalar dependências'
+
+          - task: replacetokens@6
+            inputs:
+              root: '$(System.DefaultWorkingDirectory)/src/env/'
+              sources: '.env.development'
+              tokenPattern: 'doubleunderscores'
+              addBOM: true
+              ifNoFilesFound: 'warn'
+              telemetryOptout: true
+
+          - script: |
+              yarn build:develop
+            displayName: 'Fazer build da aplicação'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathtoPublish: 'dist'
+              artifactName: 'build-dev'
+            displayName: 'Publicar artefatos'
+
+  ################################################################################################
+
+  - stage: Build_Staging
+    displayName: 'Build Staging'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
+    jobs:
+      - job: Build
+        displayName: 'Build Staging'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: 20.x
+            displayName: 'Install Node '
+
+          - script: npm install -g yarn
+            displayName: Install Yarn
+
+          - script: |
+              corepack enable
+              yarn install
+              yarn set version 4.6.0
+            displayName: 'Instalar dependências'
+
+          - task: replacetokens@6
+            inputs:
+              root: '$(System.DefaultWorkingDirectory)/src/env/'
+              sources: '.env.staging'
+              tokenPattern: 'doubleunderscores'
+              addBOM: true
+              ifNoFilesFound: 'warn'
+              telemetryOptout: true
+
+          - script: |
+              yarn build:staging
+            displayName: 'Fazer build da aplicação'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathtoPublish: 'dist'
+              artifactName: 'build-staging'
+            displayName: 'Publicar artefatos'
+
+  ################################################################################################
+
+  - stage: Build_Hml
+    displayName: 'Build Hml'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/hml')
+    variables:
+      - group: custom-web-var
+      - group: custom-web-analytics-hml
+    jobs:
+      - job: Build
+        displayName: 'Build Hml'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: 20.x
+            displayName: 'Install Node '
+
+          - script: npm install -g yarn
+            displayName: Install Yarn
+
+          - script: |
+              corepack enable
+              yarn install
+              yarn set version 4.6.0
+            displayName: 'Instalar dependências'
+
+          - task: replacetokens@6
+            inputs:
+              root: '$(System.DefaultWorkingDirectory)/src/env/'
+              sources: '.env.hml'
+              tokenPattern: 'doubleunderscores'
+              addBOM: true
+              ifNoFilesFound: 'warn'
+              telemetryOptout: true
+
+          - script: |
+              yarn build:hml
+            displayName: 'Fazer build da aplicação'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathtoPublish: 'dist'
+              artifactName: 'build-hml'
+            displayName: 'Publicar artefatos'
+
+  ################################################################################################
+
+  - stage: Build_Prod
+    displayName: 'Build Produção'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    variables:
+      - group: custom-web-var
+      - group: custom-web-analytics-prod
+    jobs:
+      - job: Build
+        displayName: 'Build Produção'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: 20.x
+            displayName: 'Install Node '
+
+          - script: npm install -g yarn
+            displayName: Install Yarn
+
+          - script: |
+              corepack enable
+              yarn install
+              yarn set version 4.6.0
+            displayName: 'Instalar dependências'
+
+          - task: replacetokens@6
+            inputs:
+              root: '$(System.DefaultWorkingDirectory)/src/env/'
+              sources: '.env.production'
+              tokenPattern: 'doubleunderscores'
+              addBOM: true
+              ifNoFilesFound: 'warn'
+              telemetryOptout: true
+
+          - script: |
+              yarn build:production
+            displayName: 'Fazer build da aplicação'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathtoPublish: 'dist'
+              artifactName: 'build-prd'
+            displayName: 'Publicar artefatos'
+
+  ################################################################################################
+
+  - stage: Build_Clone
+    displayName: 'Build Clone'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    variables:
+      - group: custom-web-var
+      - group: custom-web-analytics-clone
+    jobs:
+      - job: Build
+        displayName: 'Build Clone'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: 20.x
+            displayName: 'Install Node '
+
+          - script: npm install -g yarn
+            displayName: Install Yarn
+
+          - script: |
+              corepack enable
+              yarn install
+              yarn set version 4.6.0
+            displayName: 'Instalar dependências'
+
+          - task: replacetokens@6
+            inputs:
+              root: '$(System.DefaultWorkingDirectory)/src/env/'
+              sources: '.env.clone'
+              tokenPattern: 'doubleunderscores'
+              addBOM: true
+              ifNoFilesFound: 'warn'
+              telemetryOptout: true
+
+          - script: |
+              yarn build:clone
+            displayName: 'Fazer build da aplicação'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathtoPublish: 'dist'
+              artifactName: 'build-clone'
+            displayName: 'Publicar artefatos'
+################################################################################################

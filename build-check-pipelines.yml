@@ -1,0 +1,38 @@
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: LintAndTest
+    displayName: 'Lint e Testes'
+    jobs:
+      - job: BuildCheck
+        displayName: 'Job de Verificação de Build'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '23.x'
+            displayName: 'Install Node.js'
+
+          - script: npm install -g yarn
+            displayName: Install Yarn
+
+          - script: |
+              corepack enable
+              yarn set version 4.6.0
+            displayName: 'Enable Corepack'
+
+          - script: |
+              yarn install --immutable
+            displayName: 'Install dependencies'
+
+          - script: |
+              yarn lint
+            displayName: 'Run Linting'
+
+          - script: |
+              yarn test:ci
+            displayName: 'Run Tests'
+
+          - script: |
+              yarn build
+            displayName: 'Build Application'
